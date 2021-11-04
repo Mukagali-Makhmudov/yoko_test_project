@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:yoko_test/models/activity_list.dart';
+import 'package:yoko_test/screens/detail_page.dart';
 import 'package:yoko_test/service/service.dart';
 
 class ActivityPage extends StatelessWidget {
@@ -9,14 +10,17 @@ class ActivityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar:  AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.black
+        ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
-        title: Text(
+        title: const Text(
           'Активности',
           style: TextStyle(
-            fontSize: 20,
             color: Colors.black
           ),
         ),
@@ -42,12 +46,12 @@ class _ActivityListWidgetState extends State<ActivityListWidget> {
     Widget activityCard(String name, String url){
       return Container(
         height: 220,
-        margin: EdgeInsets.only(top: 16, right: 16, left: 16),
+        margin: const EdgeInsets.only(top: 16, right: 16, left: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           image: DecorationImage(
-          fit: BoxFit.cover,
-          image: NetworkImage(url)
+            fit: BoxFit.cover,
+            image: NetworkImage(url)
           )
         ),
         child: Container(
@@ -66,17 +70,17 @@ class _ActivityListWidgetState extends State<ActivityListWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.only(left: 14, top: 12),
+                padding: const EdgeInsets.only(left: 14, top: 12),
                 child: Text(
                   name, 
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 21,
                     fontWeight: FontWeight.bold
                   )
                 )
               ),
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(left: 14, top: 6),
                 child: Text(
                   'Оплачивайте частые\nуслуги просто!',
@@ -91,12 +95,15 @@ class _ActivityListWidgetState extends State<ActivityListWidget> {
         )
       );
     }
-    
     return FutureBuilder<ActivityList>(
       future: getData(tokensBox.get('access')),
       builder: (BuildContext context, AsyncSnapshot<ActivityList> snapshot) {
         switch(snapshot.connectionState){
-        case ConnectionState.waiting: return const Text('Loading...');
+        case ConnectionState.waiting: return const Align(
+          alignment: Alignment.center,
+          child: Text('Loading...', style: TextStyle(fontSize: 25, color: Colors.blue),
+          )
+        );
         default: 
           if (snapshot.hasError){
             return Text('Error: ${snapshot.error}');
@@ -108,13 +115,13 @@ class _ActivityListWidgetState extends State<ActivityListWidget> {
               itemBuilder: (context, index){
                 return GestureDetector(
                   onTap: (){
-                    // Navigator.push(
-                    //   context, 
-                    //   MaterialPageRoute(
-                    //     builder: (context) => DetailPage(),
-                    //     settings: RouteSettings(arguments: snapshot.data!.restaurantList[index]),
-                    //   )
-                    // );
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(
+                        builder: (context) => DetailPage(index: index,),
+                        settings: RouteSettings(arguments: snapshot.data!.activity[index]),
+                      )
+                    );
                   },
                   child: activityCard(snapshot.data!.activity[index].nameRu, snapshot.data!.activity[index].imageUrl),
                 );
