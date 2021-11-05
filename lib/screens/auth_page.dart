@@ -1,9 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:yoko_test/models/tokens.dart';
-import 'package:yoko_test/screens/activity_page.dart';
+import 'package:yoko_test/constants/color_const.dart';
+import 'package:yoko_test/constants/text_const.dart';
+import 'package:yoko_test/service/service.dart';
 
 class AuthPage extends StatefulWidget {
 
@@ -22,26 +21,32 @@ class _AuthPageState extends State<AuthPage> {
     Widget input(String hint, TextEditingController controller){
       return Container(
         height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: TextField(
-          style: TextStyle(color: Colors.white, fontSize: 16),
+          style: const TextStyle(
+            color: AppColors.mainAppTextColor, 
+            fontSize: 16,
+          ),
           controller: controller,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white.withOpacity(0.05),
+            fillColor: AppColors.inputAuthorizationFormBackColor,
             hintText: hint,
-            hintStyle: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.5)),
+            hintStyle: TextStyle(
+              fontSize: 16, 
+              color: AppColors.hintColor,
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
               borderSide: BorderSide(
-                color: Colors.white.withOpacity(0.5),
+                color: AppColors.borderColorWithOpacity,
                 width: 0.3
               )
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
               borderSide: BorderSide(
-                color: Colors.white.withOpacity(0.5),
+                color: AppColors.borderColorWithOpacity,
                 width: 0.3
               )
             ),
@@ -53,12 +58,18 @@ class _AuthPageState extends State<AuthPage> {
     Widget socialMedias(){
       return Column(
         children: [
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(bottom: 15),
-            child: Text('Или войдите через:', style: TextStyle(fontSize: 16, color: Colors.white),)
+            child: Text(
+              AppTexts.socialMediasText, 
+              style: TextStyle(
+                fontSize: 16, 
+                color: AppColors.mainAppTextColor
+              )
+            )
           ),
           Padding(
-            padding: EdgeInsets.only(left: 30),
+            padding: const EdgeInsets.only(left: 30),
             child: Row(
               children: [
                 Container(
@@ -66,29 +77,49 @@ class _AuthPageState extends State<AuthPage> {
                   height: 50,
                   width: 50,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white, width: 1),
+                    border: Border.all(
+                      color: AppColors.borderColor, 
+                      width: 1
+                    ),
                     borderRadius: BorderRadius.circular(12)
                   ),
-                  child: Center(
-                    child: Text('G', style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),)
-                  ),
+                  child: const Center(
+                    child: Text(
+                      AppTexts.socialMediaGoogleSymbol, 
+                      style: TextStyle(
+                        color: AppColors.mainAppTextColor, 
+                        fontSize: 30, 
+                        fontWeight: FontWeight.bold
+                      )
+                    )
+                  )
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Container(
                   alignment: Alignment.center,
                   height: 50,
                   width: 50,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white, width: 1),
+                    border: Border.all(
+                      color: AppColors.borderColor, 
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(12)
                   ),
-                  child: Center(
-                    child: Text('f', style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),)
+                  child: const Center(
+                    child: Text(
+                      AppTexts.socialMediaFacebookSymbol, 
+                      style: TextStyle(
+                        color: AppColors.mainAppTextColor, 
+                        fontSize: 30, 
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       );
     }
@@ -97,49 +128,33 @@ class _AuthPageState extends State<AuthPage> {
       return Container(
         height: 50,
         width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: OutlinedButton(
           style: ButtonStyle(
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+            backgroundColor: MaterialStateProperty.all<Color>(
+              AppColors.backgroundColor,
+            ),
           ),
-          child: Text('Войти', style: TextStyle(fontSize: 16, color: Color(0xFF5E94E1))),
+          child: const Text(
+            AppTexts.signInText, 
+            style: TextStyle(
+              fontSize: 16, 
+              color: AppColors.mainAppColor,
+            ),
+          ),
           onPressed: () async {
-            Dio dio = Dio();
-            Box tokensBox = Hive.box('tokens');
-            try {
-              Response response = await dio.post(
-                'https://api.shymbulak-dev.com/user-service/auth/login',
-                data: {
-                  'email': 'test@yoko.space',
-                  'password': 'qwerty123'
-                }
-              );
-
-              TokensModel tokensModel = TokensModel(
-                access: response.data['accessToken'],
-              );
-
-              tokensBox.put('access', tokensModel.access);
-
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ActivityPage()));
-            } on DioError catch (e) {
-              showCupertinoModalPopup(
-                context: context, 
-                builder: (context){
-                  return CupertinoAlertDialog(
-                    title: Text('Ошибка'),
-                    content: Text('Неправильный логин или пароль!'),
-                    actions: [
-                      CupertinoButton(child: Text('OK'), onPressed: () => Navigator.pop(context,))
-                    ],
-                  );
-                }
-              );
-              throw e;
-            }
+            await authFunc(
+              context, 
+              emailController.text, 
+              passwordController.text,
+            );
           },
-        )
+        ),
       );
     }
 
@@ -147,24 +162,34 @@ class _AuthPageState extends State<AuthPage> {
       return Column(
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 54, bottom: 12),
-            child: input('E-mail', emailController),
+            padding: const EdgeInsets.only(top: 54, bottom: 12),
+            child: input(AppTexts.emailHintText, emailController),
           ),
           Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: input('Password', passwordController),
+            padding: const EdgeInsets.only(bottom: 12),
+            child: input(AppTexts.passwordHintText, passwordController),
           ),
           authButton(),
           Padding(
-            padding: EdgeInsets.only(top: 16, left: 24, right: 24),
-            child: Container(
-              child: Row(
-                children: [
-                  Text('Регистрация', style: TextStyle(fontSize: 16, color: Colors.white)),
-                  SizedBox(width: 140,),
-                  Text('Забыли пароль?', style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.5)))
-                ],
-              ),
+            padding: const EdgeInsets.only(top: 16, left: 24, right: 24),
+            child: Row(
+              children: [
+                const Text(
+                  AppTexts.registrationOptionName, 
+                  style: TextStyle(
+                    fontSize: 16, 
+                    color: AppColors.mainAppTextColor
+                  ),
+                ),
+                const SizedBox(width: 140,),
+                Text(
+                  AppTexts.passwordUpdateOptionName, 
+                  style: TextStyle(
+                    fontSize: 16, 
+                    color: AppColors.hintColor,
+                  ),
+                ),
+              ],
             ), 
           ),
         ],
@@ -173,22 +198,27 @@ class _AuthPageState extends State<AuthPage> {
 
   
     return Scaffold(
-      backgroundColor: Color(0xFF5E94E1),
+      backgroundColor: AppColors.mainAppColor,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(top: 147, left: 24),
-              child: Text('Добро пожаловать,\nАвторизуйтесь',
-                style: TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+              child: Text(
+                AppTexts.authorizationPageHeader,
+                style: TextStyle(
+                  fontSize: 32, 
+                  color: AppColors.mainAppTextColor, 
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             form(),
             Padding(
-              padding: EdgeInsets.only(top: 24, left: 120, right: 120),
+              padding: const EdgeInsets.only(top: 24, left: 120, right: 120),
               child: socialMedias(),
-            )
+            ),
           ],
         ),
       ),
